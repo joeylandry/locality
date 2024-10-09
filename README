@@ -1,0 +1,94 @@
+
+Joey Landry (jlandr04) and Arshiya Lall (alall01)
+
+COLLABORATIVE WORK: 
+We are grateful for all the TAs in office hours and all their help. We  
+leveraged stack overflow when we had questions with debugging. A2Test.c 
+was used for testing. The interface for UArray2b was incredibly helpful
+(obviously). A2Block.h was helpful for designing our ppmtrans.c. File pnm.h 
+was useful for reading, writing, etc for a pnm file. The geometric calculations
+helped us with our ppmtrans.c rotation functions. Finally, the locality timing 
+tutorial was useful in using the CPUtime_T class for the implementation of our 
+timer. 
+
+CORRECTLY IMPLEMENTED FUNCTIONS: 
+UArray2b.c and A2Plain.c have been correctly implemented. The following for 
+ppmtrans.c has also been implemented correctly. -row-major, -column-major and 
+-block-major options have been implemented successfully. -rotate 0, -rotate 90,
+-rotate 180, -rotate 270 have been included in our program correctly. However, 
+we were unable to implemented -flip horizontal, -flip vertical, -transpose 
+due to time constraints; our program rejects these inputs appropriately. 
+-time option has been implemented in our program. Our program does not free
+all memory when the exit code is 1, EXIT_FAILURE. 
+
+ARCHITECTURE OF SOLUTION: 
+ppmtrans works to transform images and PPM files, especially conducting
+rotations of 0, 90, 180 and 270 degrees through 3 different styles of mapping:
+row major, col major and block major. The ppmtrans.c file handles command line 
+arguments, reads in the PPM image, transforms it and then writes to output. 
+A2Methods_T is used to abstract 2D array and leverages UArray2 Methods 
+(includes row and col major mapping) and UArray2b methods (has 
+block-major to increase cache locality). This program also measures CPU time
+needed to rotate an image. 
+
+As for the logic behind image transformation, we know a 0 degree rotation 
+does not change pixel data. For a 90 degrees rotation, row and col are 
+swapped, and reverses rows. For 180 degree rotation, row and col are flipped. 
+Finally a 270 degree rotation is similar to 90 but reverses it. The program's
+default behavior is row-major which takes one row at a time. Col-major 
+takes pixels one column at a time. Finally, block-major mapping means pixels
+are traversed in small blocks and cache locality is optimized for larger 
+pixels, as they are closer in memory to one another (especially for large
+images).
+
+Our program handles files of a variety of sizes and also has a library 
+that allows you to see the CPU time used to process an image by finding
+the average time per pixel. 
+
+Overall, we believe the architecture of our program is modular and allows
+us to handle a variety of inputs and appropriately stops our program when
+needed. 
+
+MEASURED PERFORMANCE AND EXPLAINED RESULTS: 
+CPU Type and Model: Intel(R) Xeon(R) Silver 4214Y CPU @ 2.20GHz
+Clock Rate: 2.20 GHz
+
+| Rotation           | Mapping        | Image Size (Pixels) | Total Time (ns)   | Time per Pixel (ns) | Instructions per Pixel |
+|--------------------|----------------|---------------------|-------------------|---------------------|------------------------|
+| 90                 | row-map        | 49,939,200           | 4,614,749,140     | 92.407              | 92.407                 |
+| 180                | col-map        | 49,939,200           | 9,134,777,850     | 182.918             | 182.918                |
+| 270                | block-map      | 49,939,200           | 3,581,145,029     | 71.710              | 71.710                 |
+| 0                  | row-map        | 49,939,200           | 1,649,694,553     | 33.034              | 33.034                 |
+| 0                  | row-map        | 3,363,552            | 108,409,611       | 32.231              | 32.231                 |
+| 90                 | col-map        | 3,363,552            | 250,061,327       | 74.344              | 74.344                 |
+| 180                | block-map      | 3,363,552            | 229,197,922       | 68.142              | 68.142                 |
+| 270                | row-map        | 3,363,552            | 231,570,458       | 68.847              | 68.847                 |
+| 0                  | row-map        | 5,979,648            | 192,346,486       | 32.167              | 32.167                 |
+| 90                 | col-map        | 5,979,648            | 459,049,240       | 76.769              | 76.769                 |
+| 180                | block-map      | 5,979,648            | 417,055,984       | 69.746              | 69.746                 |
+| 270                | row-map        | 5,979,648            | 436,489,536       | 72.996              | 72.996                 |
+
+Row-map vs. col-map: for the different image sizes, row-mapped rotations 0 and 270 performed better than column mapped 90 rotations.
+This is because the way that memory is accessed. Row mapping rotations can take advantage of spatial locality which leads to fewer
+cache misses. Column rotations can sometimes require jumps in memory locations which causes more cache misses and slow performance.
+Block mapping methods out perform col and row mapping because data is organized into small blocks that fit in the cache effeciently.
+Memory can be accessed with more cache hits. Sometimes it does not outperform row-mapping but it does always out perform col mapping
+rotations, esp as size increases. For image sizes 2448x1374 and 3264x1832, the time per pixel remains similar across the mapping methods.
+This shows that for these image sizes, the number of instructions per pixel is not very dependent on image size. This may be because 
+both images fit into the systems cache so there is minimal impact on performance. The largest image, 8160x6120 time per pixel increases
+slightly because as the image grows, memory access patterns cause more cache misses, especially for mapping functions like col-map.
+This leads to slower performance. Our hypothesis was correct– 0-degree rotations were fastest in all 
+scenarios, as data does not need to be rearranged. It is apparent that block 
+mapping is efficient as size increases when we look at 180-degree rotations.
+Data is stored in blocks, which is efficient for the cache, and therefore, 
+is faster than any other mapping strategy. It is clear that the number of instructions for each pixel is mostly 
+constant, even when provided with images of varying sizes that need to be 
+mapped and rotated. When we look at the map-col-major, there is an increase
+in instructions per pixel when provided with a bigger image input. This is 
+most likely becasue during col-major, the CPU has to perform any tasks that 
+the cache cannot do and therefore, must jump from different spots in the
+memory to access data. This is far from efficient. 
+
+
+TOTAL HOURS SPENT: 
+39 hours
